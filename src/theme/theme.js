@@ -7,13 +7,13 @@ const theme = createMuiTheme({
     },
     palette : {
         primary : {
-            main : '#10ac84'
+            main : '#009432'
         },
         common : {
             white : 'white'
         },
         secondary : {
-            main : '#FDA7DF'
+            main : '#fffde7'
         }
     },
     spacing : 10
