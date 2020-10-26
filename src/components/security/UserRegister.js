@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { Avatar, Container, Typography, Grid, TextField, Button } from '@material-ui/core';
 import LockOutLineIcon from '@material-ui/icons/LockOutlined';
+import { compose } from 'recompose';
+import { consumerFirebase } from '../../server';
 
 const style = {
     paper : {
@@ -23,14 +25,59 @@ const style = {
     }
 }
 
+const initialUser = {
+    name: '',
+    lastname: '',
+    email: '',
+    password: ''
+}
+
 class UserRegister extends Component {
     state = {
+        firebase: null,
         user : {
             name: '',
             lastname: '',
             email: '',
             password: ''
         }
+    }
+
+    static getDerivedStateFromProps(nextProps, prevState){
+
+        if(nextProps.firebase === prevState.firebase){
+            return null;
+        }
+        return {
+            firebase: nextProps.firebase
+        }
+    }
+
+    onChange = e => {
+        let user = Object.assign({}, this.state.user);
+        user[e.target.name] = e.target.value;
+        this.setState({
+            user: user,
+        })
+    }
+
+    UserRegister =  e => {
+        e.preventDefault();
+        console.log('imprimir objeto usuario del state', this.state.user);
+        const { user, firebase } = this.state;
+
+        firebase.db
+        .collection("Users")
+        .add(user)
+        .then(userAfter => {
+            console.log('esta insercion fue un exito', userAfter);
+            this.setState({
+                user: initialUser
+            })
+        })
+        .catch(error => {
+            console.log('erros', error);
+        })
     }
 
     render() {
@@ -46,21 +93,21 @@ class UserRegister extends Component {
                 <form style={style.form}>
                     <Grid container spacing={2}>
                         <Grid item md={6} xs={12}>
-                            <TextField name="name" fullWidth variant="outlined" label="Ingrese su nombre" />
+                            <TextField name="name" onChange={this.onChange} value={this.state.user.name} fullWidth variant="outlined" label="Ingrese su nombre" />
                         </Grid>
                         <Grid item md={6} xs={12}>
-                            <TextField name="lastname" fullWidth variant="outlined" label="Ingrese sus apellidos" />
+                            <TextField name="lastname" onChange={this.onChange} value={this.state.user.lastname} fullWidth variant="outlined" label="Ingrese sus apellidos" />
                         </Grid>
                         <Grid item md={6} xs={12}>
-                            <TextField name="email" fullWidth variant="outlined" label="Ingrese su e-mail" />
+                            <TextField name="email" onChange={this.onChange} value={this.state.user.email} fullWidth variant="outlined" label="Ingrese su e-mail" />
                         </Grid>
                         <Grid item md={6} xs={12}>
-                            <TextField type="password" name="password" fullWidth variant="outlined" label="Ingrese su password" />
+                            <TextField type="password" name="password" onChange={this.onChange} value={this.state.user.password} fullWidth variant="outlined" label="Ingrese su password" />
                         </Grid>
                     </Grid>
                     <Grid container justify="center">
                         <Grid item md={6} xs={12}>
-                            <Button type="submit" variant="contained" fullWidth size="large" color="primary" style={style.submit}>
+                            <Button type="submit" onClick={this.UserRegister} variant="contained" fullWidth size="large" color="primary" style={style.submit}>
                                 Registrar
                             </Button>
                         </Grid>
@@ -72,4 +119,4 @@ class UserRegister extends Component {
     }
 }
 
-export default UserRegister;
+export default compose(consumerFirebase)(UserRegister);
