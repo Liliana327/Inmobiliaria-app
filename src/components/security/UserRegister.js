@@ -66,17 +66,30 @@ class UserRegister extends Component {
         console.log('imprimir objeto usuario del state', this.state.user);
         const { user, firebase } = this.state;
 
-        firebase.db
-        .collection("Users")
-        .add(user)
-        .then(userAfter => {
-            console.log('esta insercion fue un exito', userAfter);
-            this.setState({
-                user: initialUser
+        firebase.auth
+        .createUserWithEmailAndPassword(user.email, user.password)
+        .then(auth => {
+
+            const userDB = {
+                userId: auth.user.uid,
+                email: user.email,
+                name: user.name,
+                lastname: user.lastname
+            };
+
+            firebase.db
+            .collection("Users")
+            .add(userDB)
+            .then(userAfter => {
+                console.log('esta insercion fue un exito', userAfter);
+                this.props.history.push('/');
+            })
+            .catch(error => {
+                console.log('erros', error);
             })
         })
         .catch(error => {
-            console.log('erros', error);
+            console.log(error)
         })
     }
 
